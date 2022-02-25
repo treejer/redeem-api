@@ -1,104 +1,25 @@
-import {Entity, hasMany, model, property} from '@loopback/repository';
-import {UserAddress} from './user-address.model';
-import {UserEmail} from './user-email.model';
-import {UserMobile} from './user-mobile.model';
+import {Entity, model, property} from '@loopback/repository';
 
 @model()
 export class User extends Entity {
   @property({
     type: 'string',
     id: true,
-    mongodb: {dataType: 'ObjectId'},
+    generated: true,
   })
   _id?: string;
 
   @property({
     type: 'string',
+    required: true,
   })
-  firstName?: string;
-
-  @property({
-    type: 'string',
-  })
-  lastName?: string;
+  username: string;
 
   @property({
     type: 'string',
   })
   email?: string;
 
-  @property({
-    type: 'boolean',
-    required: true,
-  })
-  emailVerified: boolean;
-
-  @property({
-    type: 'string',
-  })
-  mobile?: string;
-
-  @property({
-    type: 'string',
-  })
-  mobileCountry?: string;
-
-  @property({
-    type: 'boolean',
-    required: true,
-  })
-  mobileVerified: boolean;
-
-  @property({
-    type: 'string',
-  })
-  address?: string;
-
-  @property({
-    type: 'string',
-  })
-  password?: string;
-
-  @property({
-    type: 'date',
-  })
-  lastLoginAt?: Date;
-
-  @property({
-    type: 'date',
-  })
-  signedAt?: Date | null;
-
-  @property({
-    type: 'boolean',
-  })
-  isVerified?: boolean;
-
-  @property({
-    type: 'boolean',
-  })
-  isAdmin?: boolean;
-
-  @property({
-    type: 'date',
-    required: true,
-  })
-  createdAt: Date;
-
-  @property({
-    type: 'date',
-    required: true,
-  })
-  updatedAt: Date;
-
-  @hasMany(() => UserMobile, {keyFrom: 'userId'})
-  mobiles: UserMobile[];
-
-  @hasMany(() => UserAddress, {keyFrom: 'userId'})
-  addresses: UserAddress[];
-
-  @hasMany(() => UserEmail, {keyFrom: 'userId'})
-  emails: UserEmail[];
 
   constructor(data?: Partial<User>) {
     super(data);
@@ -106,9 +27,7 @@ export class User extends Entity {
 }
 
 export interface UserRelations {
-  mobiles: UserMobile[];
-  emails: UserEmail[];
-  addresses: UserAddress[];
+  // describe navigational properties here
 }
 
 export type UserWithRelations = User & UserRelations;

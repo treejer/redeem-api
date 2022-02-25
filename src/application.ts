@@ -1,6 +1,6 @@
 import {UserServiceBindings} from '@loopback/authentication-jwt';
 import {BootMixin} from '@loopback/boot';
-import {ApplicationConfig} from '@loopback/core';
+import {ApplicationConfig, createBindingFromClass} from '@loopback/core';
 import {CronComponent} from '@loopback/cron';
 import {RepositoryMixin} from '@loopback/repository';
 import {RestApplication} from '@loopback/rest';
@@ -11,6 +11,7 @@ import {
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
 import {DbDataSource} from './datasources';
+import {ErrorHandlerMiddlewareProvider} from './middlewares';
 import {MySequence} from './sequence';
 
 require('dotenv').config();
@@ -35,6 +36,7 @@ export class TreejerApiApplication extends BootMixin(
     this.component(RestExplorerComponent);
     this.component(CronComponent);
     this.dataSource(DbDataSource, UserServiceBindings.DATASOURCE_NAME);
+    this.add(createBindingFromClass(ErrorHandlerMiddlewareProvider));
 
     this.projectRoot = __dirname;
     // Customize @loopback/boot Booter Conventions here

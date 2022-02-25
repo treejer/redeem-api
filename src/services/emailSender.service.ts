@@ -6,7 +6,7 @@ import {EmailTemplate} from '../models';
 export class EmailService {
   private static async setupTransporter() {
     return createTransport({
-      host: process.env.MAIL_HOST,
+      host: process.env.MAIL_HOST!,
       port: +process.env.MAIL_PORT!,
       secure: false, // upgrade later with STARTTLS
       auth: {
