@@ -17,7 +17,7 @@ export class AccessToken extends Entity {
   })
   token: string;
 
-  @belongsTo(() => User, {}, {mongodb: {dataType: 'ObjectId'}})
+  @belongsTo(() => User, {}, {})
   userId: string;
 
   @property({

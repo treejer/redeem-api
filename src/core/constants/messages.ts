@@ -1,2 +1,1 @@
-export const SIGN_MESSAGE_TEMPLATE =
-  "Please sign this message to use in 'sign' API. nonce: ";
+export const TEST = 'THIS IS TEST VALUE';
