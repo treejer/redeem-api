@@ -214,6 +214,10 @@ export class AccessTokensController {
     if (accessTokenOne.userId !== user._id!) {
       return endResponse.bind(this)(404, 'Not Found', 'Token not found');
     }
-    await this.accessTokenRepository.deleteById(id);
+    return endResponse.bind(this)(
+      204,
+      'Deleted',
+      'Document deleted successfully',
+    );
   }
 }

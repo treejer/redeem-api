@@ -10,19 +10,11 @@ import {
 } from '@loopback/rest-explorer';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
-import {createJWT} from './core/utils';
 import {DbDataSource} from './datasources';
 import {ErrorHandlerMiddlewareProvider} from './middlewares';
-import {User} from './models';
 import {MySequence} from './sequence';
 
 require('dotenv').config();
-
-const res = createJWT(
-  {username: 'sina', email: 'abcd@example.com', _id: 'abc'} as User,
-  '70d',
-);
-console.log('res = ', res);
 
 export {ApplicationConfig};
 export class TreejerApiApplication extends BootMixin(

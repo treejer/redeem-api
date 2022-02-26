@@ -7,7 +7,6 @@ export class AccessToken extends Entity {
     type: 'string',
     id: true,
     generated: true,
-    mongodb: {dataType: 'ObjectId'},
   })
   _id?: string;
 
