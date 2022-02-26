@@ -1,12 +1,15 @@
 import {Client, supertest} from '@loopback/testlab';
 import {TreejerApiApplication} from '../..';
+import {createJWT} from '../../core/utils';
 import {AccessToken} from './../../models';
+import {User} from './../../models/user.model';
 import {AccessTokenRepository} from './../../repositories/access-token.repository';
 import {setupApplication} from './test-helper';
 
 describe('AccessTokens', () => {
   let app: TreejerApiApplication;
   let client: Client;
+  const jwt = createJWT({_id: 'TEMP_USER'} as User, '1d');
   const t1 = new AccessToken({token: 'abcdefghi'});
   const accessTokens: AccessToken[] = [];
   let accessTokenRepo: AccessTokenRepository;
@@ -33,11 +36,7 @@ describe('AccessTokens', () => {
     await client
       .post('/access-tokens')
       .set('Content-Type', 'application/json')
-      .set(
-        'token',
-        // ATTENTION: This must be JWT token in which the payload is a user object [only _id is required] signed with the token used in .env
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNpbmEiLCJlbWFpbCI6ImFiY2RAZXhhbXBsZS5jb20iLCJfaWQiOiJhYmMiLCJpYXQiOjE2NDU4MDQ5NzIsImV4cCI6MTY1MTg1Mjk3Mn0.c3IFePPJe4Y7sk_YgCia_xHQmLSrYQdZO5Zu6diH9wY',
-      )
+      .set('token', jwt)
       .send(t1)
       .expect(200)
       .then(res => accessTokens.push(res.body));
@@ -48,11 +47,7 @@ describe('AccessTokens', () => {
     await client
       .get('/access-tokens/count')
       .set('Content-Type', 'application/json')
-      .set(
-        'token',
-        // ATTENTION: This must be JWT token in which the payload is a user object [only _id is required] signed with the token used in .env
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNpbmEiLCJlbWFpbCI6ImFiY2RAZXhhbXBsZS5jb20iLCJfaWQiOiJhYmMiLCJpYXQiOjE2NDU4MDQ5NzIsImV4cCI6MTY1MTg1Mjk3Mn0.c3IFePPJe4Y7sk_YgCia_xHQmLSrYQdZO5Zu6diH9wY',
-      )
+      .set('token', jwt)
       .expect(200)
       .expect({count: 1});
   });
@@ -63,11 +58,7 @@ describe('AccessTokens', () => {
     await client
       .get('/access-tokens')
       .set('Content-Type', 'application/json')
-      .set(
-        'token',
-        // ATTENTION: This must be JWT token in which the payload is a user object [only _id is required] signed with the token used in .env
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNpbmEiLCJlbWFpbCI6ImFiY2RAZXhhbXBsZS5jb20iLCJfaWQiOiJhYmMiLCJpYXQiOjE2NDU4MDQ5NzIsImV4cCI6MTY1MTg1Mjk3Mn0.c3IFePPJe4Y7sk_YgCia_xHQmLSrYQdZO5Zu6diH9wY',
-      )
+      .set('token', jwt)
       .expect(200)
       .expect((res: supertest.Response) => {
         return (
@@ -81,11 +72,7 @@ describe('AccessTokens', () => {
     await client
       .patch('/access-tokens/')
       .set('Content-Type', 'application/json')
-      .set(
-        'token',
-        // ATTENTION: This must be JWT token in which the payload is a user object [only _id is required] signed with the token used in .env
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNpbmEiLCJlbWFpbCI6ImFiY2RAZXhhbXBsZS5jb20iLCJfaWQiOiJhYmMiLCJpYXQiOjE2NDU4MDQ5NzIsImV4cCI6MTY1MTg1Mjk3Mn0.c3IFePPJe4Y7sk_YgCia_xHQmLSrYQdZO5Zu6diH9wY',
-      )
+      .set('token', jwt)
       .send(accessTokens[0])
       .expect(200)
       .expect((res: supertest.Response) => {
@@ -101,11 +88,7 @@ describe('AccessTokens', () => {
     await client
       .del('/access-tokens/' + accessTokens[0]._id)
       .set('Content-Type', 'application/json')
-      .set(
-        'token',
-        // ATTENTION: This must be JWT token in which the payload is a user object [only _id is required] signed with the token used in .env
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNpbmEiLCJlbWFpbCI6ImFiY2RAZXhhbXBsZS5jb20iLCJfaWQiOiJhYmMiLCJpYXQiOjE2NDU4MDQ5NzIsImV4cCI6MTY1MTg1Mjk3Mn0.c3IFePPJe4Y7sk_YgCia_xHQmLSrYQdZO5Zu6diH9wY',
-      )
+      .set('token', jwt)
       .expect(204)
       .expect((res: supertest.Response) => {
         return (
