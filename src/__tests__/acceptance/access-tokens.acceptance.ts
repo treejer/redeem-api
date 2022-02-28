@@ -40,7 +40,6 @@ describe('AccessTokens', () => {
       .send(t1)
       .expect(200)
       .then(res => accessTokens.push(res.body));
-    console.log('accessTokens = ', accessTokens);
   });
 
   it('Returns number of tokens created by user', async () => {
@@ -53,8 +52,6 @@ describe('AccessTokens', () => {
   });
 
   it('Returns all of tokens created by user', async () => {
-    console.log('accessTokens = ', accessTokens);
-
     await client
       .get('/access-tokens')
       .set('Content-Type', 'application/json')
@@ -83,8 +80,6 @@ describe('AccessTokens', () => {
   });
 
   it('Deletes a token', async () => {
-    console.log('accessTokens = ', accessTokens);
-
     await client
       .del('/access-tokens/' + accessTokens[0]._id)
       .set('Content-Type', 'application/json')

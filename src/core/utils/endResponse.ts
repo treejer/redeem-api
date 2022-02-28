@@ -2,7 +2,7 @@ import {Response} from '@loopback/rest';
 import {apiResponse} from '../../models';
 
 interface Scope {
-  res: Response;
+  response: Response;
 }
 
 export function endResponse(
@@ -11,9 +11,10 @@ export function endResponse(
   statusMessage: string,
   message?: string,
   data?: object,
-) {
-  this.res.writeHead(statusCode, statusMessage, {
+): void {
+  this.response.writeHead(statusCode, statusMessage, {
     'Content-Type': 'application/json',
   });
-  this.res.end(JSON.stringify(apiResponse(message ?? 'Done', data)));
+  const response = apiResponse(message ?? 'Done', data);
+  this.response.end(JSON.stringify(response));
 }

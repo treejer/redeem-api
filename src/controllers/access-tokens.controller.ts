@@ -1,5 +1,6 @@
 import {inject} from '@loopback/core';
 import {
+  Count,
   CountSchema,
   Filter,
   FilterExcludingWhere,
@@ -16,7 +17,7 @@ import {
   Request,
   requestBody,
   Response,
-  response,
+  response as responseSpec,
   RestBindings,
 } from '@loopback/rest';
 import {endResponse, generateToken, userAuthentication} from '../core/utils';
@@ -25,15 +26,15 @@ import {AccessTokenRepository} from '../repositories';
 
 export class AccessTokensController {
   constructor(
-    @inject(RestBindings.Http.REQUEST) public req: Request,
-    @inject(RestBindings.Http.RESPONSE) public res: Response,
+    @inject(RestBindings.Http.REQUEST) public request: Request,
+    @inject(RestBindings.Http.RESPONSE) public response: Response,
 
     @repository(AccessTokenRepository)
     public accessTokenRepository: AccessTokenRepository,
   ) {}
 
   @post('/access-tokens')
-  @response(201, {
+  @responseSpec(201, {
     description: 'AccessToken model instance',
     content: {'application/json': {schema: getModelSchemaRef(AccessToken)}},
   })
@@ -49,14 +50,9 @@ export class AccessTokensController {
       },
     })
     accessToken: Omit<AccessToken, '_id'>,
-  ) {
-    const user = userAuthentication.bind(this.req)();
-    if (!user)
-      return endResponse.bind(this)(
-        401,
-        'Authentication Required',
-        "'token' header must be sent and be a valid token",
-      );
+  ): Promise<AccessToken | void> {
+    const user = userAuthentication.bind(this)();
+    if (!user) return;
 
     if (!accessToken.token) {
       accessToken.token = generateToken();
@@ -67,18 +63,15 @@ export class AccessTokensController {
   }
 
   @get('/access-tokens/count')
-  @response(200, {
+  @responseSpec(200, {
     description: 'AccessToken model count',
     content: {'application/json': {schema: CountSchema}},
   })
-  async count(@param.where(AccessToken) where?: Where<AccessToken>) {
-    const user = userAuthentication.bind(this.req)();
-    if (!user)
-      return endResponse.bind(this)(
-        401,
-        'Authentication Required',
-        "'token' header must be sent and be a valid token",
-      );
+  async count(
+    @param.where(AccessToken) where?: Where<AccessToken>,
+  ): Promise<Count | void> {
+    const user = userAuthentication.bind(this)();
+    if (!user) return;
     return this.accessTokenRepository.count({
       ...where,
       userId: user._id!,
@@ -86,7 +79,7 @@ export class AccessTokensController {
   }
 
   @get('/access-tokens')
-  @response(200, {
+  @responseSpec(200, {
     description: 'Array of AccessToken model instances',
     content: {
       'application/json': {
@@ -97,14 +90,11 @@ export class AccessTokensController {
       },
     },
   })
-  async find(@param.filter(AccessToken) filter?: Filter<AccessToken>) {
-    const user = userAuthentication.bind(this.req)();
-    if (!user)
-      return endResponse.bind(this)(
-        401,
-        'Authentication Required',
-        "'token' header must be sent and be a valid token",
-      );
+  async find(
+    @param.filter(AccessToken) filter?: Filter<AccessToken>,
+  ): Promise<AccessToken[] | void> {
+    const user = userAuthentication.bind(this)();
+    if (!user) return;
     if (!filter) filter = {};
     if (!filter.where) filter.where = {userId: user._id!};
     return this.accessTokenRepository.find({
@@ -114,7 +104,7 @@ export class AccessTokensController {
   }
 
   @patch('/access-tokens')
-  @response(200, {
+  @responseSpec(200, {
     description: 'AccessToken PATCH success count',
     content: {'application/json': {schema: CountSchema}},
   })
@@ -128,14 +118,9 @@ export class AccessTokensController {
     })
     accessToken: AccessToken,
     @param.where(AccessToken) where?: Where<AccessToken>,
-  ) {
-    const user = userAuthentication.bind(this.req)();
-    if (!user)
-      return endResponse.bind(this)(
-        401,
-        'Authentication Required',
-        "'token' header must be sent and be a valid token",
-      );
+  ): Promise<Count | void> {
+    const user = userAuthentication.bind(this)();
+    if (!user) return;
     return this.accessTokenRepository.updateAll(
       {...accessToken, userId: user._id},
       where,
@@ -143,7 +128,7 @@ export class AccessTokensController {
   }
 
   @get('/access-tokens/{id}')
-  @response(200, {
+  @responseSpec(200, {
     description: 'AccessToken model instance',
     content: {
       'application/json': {
@@ -155,22 +140,21 @@ export class AccessTokensController {
     @param.path.string('id') id: string,
     @param.filter(AccessToken, {exclude: 'where'})
     filter?: FilterExcludingWhere<AccessToken>,
-  ) {
-    const user = userAuthentication.bind(this.req)();
-    if (!user)
-      return endResponse.bind(this)(
-        401,
-        'Authentication Required',
-        "'token' header must be sent and be a valid token",
-      );
-    return this.accessTokenRepository.find({
+  ): Promise<AccessToken | void> {
+    const user = userAuthentication.bind(this)();
+    if (!user) return;
+    const allTokens = await this.accessTokenRepository.find({
       ...filter,
       where: {userId: user._id!},
     });
+    if (!allTokens || allTokens.length === 0) {
+      return endResponse.bind(this)(404, 'Not Found', 'Token not found');
+    }
+    return allTokens[0];
   }
 
   @patch('/access-tokens/{id}')
-  @response(204, {
+  @responseSpec(204, {
     description: 'AccessToken PATCH success',
   })
   async updateById(
@@ -183,33 +167,22 @@ export class AccessTokensController {
       },
     })
     accessToken: AccessToken,
-  ) {
-    const user = userAuthentication.bind(this.req)();
-    if (!user)
-      return endResponse.bind(this)(
-        401,
-        'Authentication Required',
-        "'token' header must be sent and be a valid token",
-      );
-
-    await this.accessTokenRepository.update(
+  ): Promise<AccessToken | void> {
+    const user = userAuthentication.bind(this)();
+    if (!user) return;
+    return this.accessTokenRepository.update(
       {_id: id, userId: user._id!} as AccessToken,
       accessToken,
     );
   }
 
   @del('/access-tokens/{id}')
-  @response(204, {
+  @responseSpec(204, {
     description: 'AccessToken DELETE success',
   })
-  async deleteById(@param.path.string('id') id: string) {
-    const user = userAuthentication.bind(this.req)();
-    if (!user)
-      return endResponse.bind(this)(
-        401,
-        'Authentication Required',
-        "'token' header must be sent and be a valid token",
-      );
+  async deleteById(@param.path.string('id') id: string): Promise<void> {
+    const user = userAuthentication.bind(this)();
+    if (!user) return;
     const accessTokenOne = await this.accessTokenRepository.findById(id);
     if (accessTokenOne.userId !== user._id!) {
       return endResponse.bind(this)(404, 'Not Found', 'Token not found');
