@@ -4,3 +4,4 @@ export * from './twilio.model';
 export * from './user.model';
 export * from './access-token.model';
 export * from './webhook.model';
+export * from './token.model';
